@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Chatbot</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="chat-app">
+
+    <!-- ================= HEADER ================= -->
+    <header class="header">
+
+        <div class="brand">
+            <div class="brand-title">
+                🤖 AI Chatbot
+            </div>
+
+            <div class="brand-subtitle">
+                Powered by Ollama + Llama 3.2
+            </div>
+        </div>
+
+        <div class="header-buttons">
+
+            <button id="darkModeBtn" title="Dark Mode">
+                🌙
+            </button>
+
+            <button id="clearChatBtn">
+                🗑️ Clear Chat
+            </button>
+
+            <button id="exportBtn">
+                📥 Export
+            </button>
+
+            <a href="/logout" class="logout-btn">
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN ================= -->
+    <main class="main-container">
+
+        <!-- ============ CHAT AREA ============ -->
+        <section class="chat-section">
+
+            <!-- Messages -->
+            <div id="chatMessages" class="chat-messages">
+
+                <div class="message ai-message">
+
+                    <div class="message-name">
+                        AI 🔊
+                    </div>
+
+                    <div class="message-text">
+                        Hello! How can I assist you today?
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ============ INPUT AREA ============ -->
+            <div class="bottom-area">
+
+                <!-- PDF -->
+                <div class="pdf-row">
+
+                    <label for="pdfInput" class="pdf-button">
+                        📄 Upload PDF
+                    </label>
+
+                    <input
+                        type="file"
+                        id="pdfInput"
+                        accept=".pdf"
+                        hidden
+                    >
+
+                    <span id="pdfStatus">
+                        No PDF selected
+                    </span>
+
+                </div>
+
+
+                <!-- Chat input -->
+                <div class="input-row">
+
+                    <textarea
+                        id="messageInput"
+                        placeholder="Type your message..."
+                        rows="1"
+                    ></textarea>
+
+                    <button
+                        id="voiceBtn"
+                        class="voice-btn"
+                        title="Voice Input"
+                    >
+                        🎤
+                    </button>
+
+                    <button
+                        id="sendBtn"
+                        class="send-btn"
+                    >
+                        Send
+                    </button>
+
+                </div>
+
+
+                <div class="voice-info">
+                    🎤 Click microphone to speak
+                    &nbsp; • &nbsp;
+                    🔊 Click AI answer for voice
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============ MEMORY ============ -->
+        <aside class="memory-panel">
+
+            <div class="memory-header">
+
+                <div>
+                    <div class="memory-title">
+                        🧠 Memory
+                    </div>
+
+                    <div class="memory-subtitle">
+                        Things saved from your conversations
+                    </div>
+                </div>
+
+                <button id="clearMemoryBtn" class="memory-clear">
+                    Clear
+                </button>
+
+            </div>
+
+
+            <div id="memoryList" class="memory-list">
+
+                <div class="no-memory">
+                    No memories yet.
+                </div>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,449 @@
+/* =====================================================
+   AI CHATBOT - CLEAN COMPACT UI
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #111;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header {
+    height: 90px;
+    background: #202020;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 28px;
+}
+
+.header-left h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.header-left p {
+    margin: 5px 0 0;
+    font-size: 15px;
+    color: #ddd;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.header button {
+    border: none;
+    background: #444;
+    color: white;
+    padding: 11px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.header button:hover {
+    background: #555;
+}
+
+
+/* =====================================================
+   MAIN LAYOUT
+===================================================== */
+
+.main-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 90px);
+}
+
+
+/* =====================================================
+   CHAT SECTION
+===================================================== */
+
+.chat-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+
+/* =====================================================
+   CHAT MESSAGES
+===================================================== */
+
+#chatMessages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 25px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    /* IMPORTANT */
+    min-height: 0;
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+.message {
+    width: fit-content;
+    max-width: 75%;
+    padding: 14px 18px;
+    border-radius: 14px;
+
+    /* IMPORTANT */
+    min-height: 0;
+    height: auto;
+
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+
+/* USER MESSAGE */
+
+.user-message {
+    align-self: flex-end;
+    background: #d7ebff;
+    color: #111;
+}
+
+
+/* AI MESSAGE */
+
+.ai-message {
+    align-self: flex-start;
+    background: #eeeeee;
+    color: #111;
+}
+
+
+/* MESSAGE NAME */
+
+.message-name,
+.message-label {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+
+/* MESSAGE TEXT */
+
+.message-text {
+    white-space: pre-wrap;
+    font-size: 16px;
+}
+
+
+/* =====================================================
+   INPUT AREA
+===================================================== */
+
+.input-area {
+    flex-shrink: 0;
+    background: white;
+    border-top: 1px solid #ddd;
+    padding: 10px 20px;
+}
+
+
+/* PDF */
+
+.pdf-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.pdf-area button,
+.pdf-area label {
+    padding: 8px 12px;
+    border-radius: 7px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+}
+
+
+/* INPUT ROW */
+
+.input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#messageInput {
+    flex: 1;
+    min-width: 0;
+    height: 50px;
+    max-height: 120px;
+    resize: none;
+
+    border: 1px solid #ccc;
+    border-radius: 10px;
+
+    padding: 13px 15px;
+    font-size: 16px;
+    outline: none;
+}
+
+#messageInput:focus {
+    border-color: #777;
+}
+
+
+/* VOICE */
+
+#voiceBtn {
+    width: 52px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    background: #eee;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+
+/* SEND */
+
+#sendBtn {
+    height: 50px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 10px;
+    background: #202020;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#sendBtn:hover {
+    background: #333;
+}
+
+#sendBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* =====================================================
+   VOICE HELP
+===================================================== */
+
+.voice-help {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #777;
+}
+
+
+/* =====================================================
+   MEMORY SIDEBAR
+===================================================== */
+
+.memory-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+
+    border-left: 1px solid #ddd;
+    background: white;
+
+    padding: 20px;
+
+    overflow-y: auto;
+}
+
+.memory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.memory-header h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.memory-header button {
+    border: none;
+    background: #ddd;
+    padding: 9px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.memory-description {
+    color: #777;
+    font-size: 14px;
+    margin: 8px 0 15px;
+}
+
+
+/* MEMORY ITEMS */
+
+.memory-item {
+    background: #f1f1f1;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.no-memory,
+.empty-memory {
+    color: #888;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   SPEAK BUTTON
+===================================================== */
+
+.speak-button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+}
+
+
+/* =====================================================
+   DARK MODE
+===================================================== */
+
+body.dark-mode {
+    background: #121212;
+    color: #eee;
+}
+
+body.dark-mode .chat-section {
+    background: #121212;
+}
+
+body.dark-mode #chatMessages {
+    background: #121212;
+}
+
+body.dark-mode .ai-message {
+    background: #292929;
+    color: #eee;
+}
+
+body.dark-mode .user-message {
+    background: #174a70;
+    color: white;
+}
+
+body.dark-mode .memory-sidebar {
+    background: #1d1d1d;
+    border-left-color: #444;
+}
+
+body.dark-mode .memory-item {
+    background: #292929;
+    color: #eee;
+}
+
+body.dark-mode .input-area {
+    background: #1d1d1d;
+    border-top-color: #444;
+}
+
+body.dark-mode #messageInput {
+    background: #292929;
+    color: white;
+    border-color: #555;
+}
+
+body.dark-mode #voiceBtn {
+    background: #333;
+    color: white;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 800px) {
+
+    .main-container {
+        height: auto;
+        min-height: calc(100vh - 90px);
+    }
+
+    .memory-sidebar {
+        width: 250px;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .main-container {
+        flex-direction: column;
+    }
+
+    .memory-sidebar {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid #ddd;
+        max-height: 220px;
+    }
+
+    .header {
+        padding: 12px;
+    }
+
+    .header-left h1 {
+        font-size: 23px;
+    }
+
+    .header-buttons {
+        gap: 4px;
+    }
+
+    .header button {
+        padding: 8px;
+    }
+
+    .message {
+        max-width: 90%;
+    }
+
+}
