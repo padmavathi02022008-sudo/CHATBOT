@@ -1,3 +1,4 @@
+```python
 from flask import (
     Flask,
     render_template,
@@ -32,41 +33,63 @@ from database import (
 )
 
 
+# =========================================================
+# APP
+# =========================================================
+
 app = Flask(__name__)
 
-app.secret_key = "ai-chatbot-secret-key-change-this"
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "ai-chatbot-secret-key-change-this"
+)
 
-OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
 
-MODEL = "llama3.2:latest"
+# =========================================================
+# GROQ
+# =========================================================
+
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+MODEL = "llama-3.3-70b-versatile"
+
+
+# =========================================================
+# UPLOADS
+# =========================================================
 
 UPLOAD_FOLDER = "uploads"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-# --------------------------------------------------
+# =========================================================
 # DATABASE
-# --------------------------------------------------
+# =========================================================
 
 init_database()
 
 
-# --------------------------------------------------
+# =========================================================
 # LOGIN REQUIRED
-# --------------------------------------------------
+# =========================================================
 
 def login_required():
     return "user_id" in session
 
 
-# --------------------------------------------------
+# =========================================================
 # LANGUAGE DETECTION
-# --------------------------------------------------
+# =========================================================
 
 def detect_language(text):
 
-    tamil_chars = re.findall(r"[\u0B80-\u0BFF]", text)
+    tamil_chars = re.findall(
+        r"[\u0B80-\u0BFF]",
+        text
+    )
 
     english_chars = re.findall(
         r"[A-Za-z]",
@@ -82,9 +105,9 @@ def detect_language(text):
     return "English"
 
 
-# --------------------------------------------------
+# =========================================================
 # HOME
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/")
 def home():
@@ -95,93 +118,130 @@ def home():
     return redirect(url_for("chat"))
 
 
-# --------------------------------------------------
+# =========================================================
 # REGISTER
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
     if request.method == "POST":
 
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
+        username = request.form.get(
+            "username",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
 
         if not username or not password:
+
             return render_template(
                 "register.html",
                 error="Username and password are required."
             )
 
         if len(password) < 4:
+
             return render_template(
                 "register.html",
                 error="Password must contain at least 4 characters."
             )
 
-        success = create_user(username, password)
+        success = create_user(
+            username,
+            password
+        )
 
         if not success:
+
             return render_template(
                 "register.html",
                 error="Username already exists."
             )
 
-        return redirect(url_for("login"))
+        return redirect(
+            url_for("login")
+        )
 
-    return render_template("register.html")
+    return render_template(
+        "register.html"
+    )
 
 
-# --------------------------------------------------
+# =========================================================
 # LOGIN
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
     if request.method == "POST":
 
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
+        username = request.form.get(
+            "username",
+            ""
+        ).strip()
 
-        user = authenticate_user(username, password)
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        user = authenticate_user(
+            username,
+            password
+        )
 
         if user:
 
             session["user_id"] = user["id"]
+
             session["username"] = user["username"]
 
-            return redirect(url_for("chat"))
+            return redirect(
+                url_for("chat")
+            )
 
         return render_template(
             "login.html",
             error="Invalid username or password."
         )
 
-    return render_template("login.html")
+    return render_template(
+        "login.html"
+    )
 
 
-# --------------------------------------------------
+# =========================================================
 # LOGOUT
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/logout")
 def logout():
 
     session.clear()
 
-    return redirect(url_for("login"))
+    return redirect(
+        url_for("login")
+    )
 
 
-# --------------------------------------------------
+# =========================================================
 # CHAT PAGE
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/chat")
 def chat():
 
     if not login_required():
-        return redirect(url_for("login"))
+
+        return redirect(
+            url_for("login")
+        )
 
     return render_template(
         "index.html",
@@ -189,15 +249,18 @@ def chat():
     )
 
 
-# --------------------------------------------------
-# GET CHAT HISTORY
-# --------------------------------------------------
+# =========================================================
+# CHAT HISTORY
+# =========================================================
 
 @app.route("/api/history")
 def history():
 
     if not login_required():
-        return jsonify({"error": "Login required"}), 401
+
+        return jsonify({
+            "error": "Login required"
+        }), 401
 
     rows = get_messages(
         session["user_id"],
@@ -218,44 +281,80 @@ def history():
     })
 
 
-# --------------------------------------------------
-# CHAT WITH OLLAMA
-# --------------------------------------------------
+# =========================================================
+# CHAT WITH GROQ
+# =========================================================
 
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
 
     if not login_required():
+
         return jsonify({
             "error": "Please login first."
         }), 401
 
     data = request.get_json()
 
-    user_message = data.get("message", "").strip()
+    if not data:
+
+        return jsonify({
+            "error": "Invalid request."
+        }), 400
+
+    user_message = data.get(
+        "message",
+        ""
+    ).strip()
 
     if not user_message:
+
         return jsonify({
             "error": "Please enter a message."
         }), 400
 
+    # -----------------------------------------------------
+    # CHECK GROQ API KEY
+    # -----------------------------------------------------
+
+    if not GROQ_API_KEY:
+
+        return jsonify({
+            "error": "Groq API key is not configured on the server."
+        }), 500
+
+
     user_id = session["user_id"]
 
-    # Save user message
+
+    # -----------------------------------------------------
+    # SAVE USER MESSAGE
+    # -----------------------------------------------------
+
     save_message(
         user_id,
         "user",
         user_message
     )
 
-    # Get previous conversation
+
+    # -----------------------------------------------------
+    # PREVIOUS CONVERSATION
+    # -----------------------------------------------------
+
     history_rows = get_messages(
         user_id,
         20
     )
 
-    # Get memory
-    memories = get_memories(user_id)
+
+    # -----------------------------------------------------
+    # MEMORY
+    # -----------------------------------------------------
+
+    memories = get_memories(
+        user_id
+    )
 
     memory_text = ""
 
@@ -266,7 +365,19 @@ def api_chat():
             for row in memories
         )
 
-    language = detect_language(user_message)
+
+    # -----------------------------------------------------
+    # LANGUAGE
+    # -----------------------------------------------------
+
+    language = detect_language(
+        user_message
+    )
+
+
+    # -----------------------------------------------------
+    # SYSTEM PROMPT
+    # -----------------------------------------------------
 
     system_prompt = f"""
 You are a helpful AI assistant.
@@ -296,12 +407,18 @@ User memory:
 {memory_text}
 """
 
+
+    # -----------------------------------------------------
+    # BUILD MESSAGES
+    # -----------------------------------------------------
+
     messages = [
         {
             "role": "system",
             "content": system_prompt
         }
     ]
+
 
     for row in history_rows:
 
@@ -310,8 +427,14 @@ User memory:
             "content": row["content"]
         })
 
-    # PDF context
-    document = get_latest_document(user_id)
+
+    # -----------------------------------------------------
+    # PDF CONTEXT
+    # -----------------------------------------------------
+
+    document = get_latest_document(
+        user_id
+    )
 
     if document:
 
@@ -333,32 +456,82 @@ User memory:
             }
         )
 
+
+    # =====================================================
+    # SEND REQUEST TO GROQ
+    # =====================================================
+
     try:
 
         response = requests.post(
-            OLLAMA_URL,
+            GROQ_URL,
+
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+
             json={
                 "model": MODEL,
                 "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 2048,
                 "stream": False
             },
+
             timeout=180
         )
 
-        response.raise_for_status()
+
+        # -------------------------------------------------
+        # HANDLE GROQ ERRORS
+        # -------------------------------------------------
+
+        if response.status_code != 200:
+
+            try:
+                error_data = response.json()
+            except Exception:
+                error_data = {}
+
+            error_message = (
+                error_data
+                .get("error", {})
+                .get("message")
+            )
+
+            if not error_message:
+                error_message = response.text
+
+            return jsonify({
+                "error": f"Groq API error: {error_message}"
+            }), 500
+
+
+        # -------------------------------------------------
+        # READ RESPONSE
+        # -------------------------------------------------
 
         result = response.json()
 
-        assistant_message = result["message"]["content"]
+        assistant_message = (
+            result["choices"][0]["message"]["content"]
+        )
+
 
     except requests.exceptions.ConnectionError:
 
         return jsonify({
-            "error": (
-                "Cannot connect to Ollama. "
-                "Please make sure Ollama is running."
-            )
+            "error": "Cannot connect to Groq API."
         }), 500
+
+
+    except requests.exceptions.Timeout:
+
+        return jsonify({
+            "error": "Groq request timed out. Please try again."
+        }), 500
+
 
     except Exception as e:
 
@@ -366,14 +539,22 @@ User memory:
             "error": str(e)
         }), 500
 
-    # Save AI answer
+
+    # -----------------------------------------------------
+    # SAVE AI ANSWER
+    # -----------------------------------------------------
+
     save_message(
         user_id,
         "assistant",
         assistant_message
     )
 
-    # Simple memory detection
+
+    # -----------------------------------------------------
+    # SIMPLE MEMORY DETECTION
+    # -----------------------------------------------------
+
     lower_message = user_message.lower()
 
     memory_words = [
@@ -387,6 +568,7 @@ User memory:
         "i love"
     ]
 
+
     if any(
         word in lower_message
         for word in memory_words
@@ -397,19 +579,24 @@ User memory:
             user_message
         )
 
+
     return jsonify({
         "answer": assistant_message
     })
 
 
-# --------------------------------------------------
+# =========================================================
 # CLEAR CHAT
-# --------------------------------------------------
+# =========================================================
 
-@app.route("/api/clear-chat", methods=["POST"])
+@app.route(
+    "/api/clear-chat",
+    methods=["POST"]
+)
 def clear_chat():
 
     if not login_required():
+
         return jsonify({
             "error": "Login required"
         }), 401
@@ -423,14 +610,15 @@ def clear_chat():
     })
 
 
-# --------------------------------------------------
+# =========================================================
 # MEMORY
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/api/memory")
 def memory():
 
     if not login_required():
+
         return jsonify({
             "error": "Login required"
         }), 401
@@ -453,14 +641,18 @@ def memory():
     })
 
 
-# --------------------------------------------------
+# =========================================================
 # CLEAR MEMORY
-# --------------------------------------------------
+# =========================================================
 
-@app.route("/api/clear-memory", methods=["POST"])
+@app.route(
+    "/api/clear-memory",
+    methods=["POST"]
+)
 def clear_memory():
 
     if not login_required():
+
         return jsonify({
             "error": "Login required"
         }), 401
@@ -474,19 +666,24 @@ def clear_memory():
     })
 
 
-# --------------------------------------------------
+# =========================================================
 # PDF UPLOAD
-# --------------------------------------------------
+# =========================================================
 
-@app.route("/api/upload-pdf", methods=["POST"])
+@app.route(
+    "/api/upload-pdf",
+    methods=["POST"]
+)
 def upload_pdf():
 
     if not login_required():
+
         return jsonify({
             "error": "Login required"
         }), 401
 
     if "file" not in request.files:
+
         return jsonify({
             "error": "No file selected."
         }), 400
@@ -494,14 +691,17 @@ def upload_pdf():
     file = request.files["file"]
 
     if not file.filename:
+
         return jsonify({
             "error": "No file selected."
         }), 400
 
     if not file.filename.lower().endswith(".pdf"):
+
         return jsonify({
             "error": "Only PDF files are supported."
         }), 400
+
 
     try:
 
@@ -514,14 +714,19 @@ def upload_pdf():
             page_text = page.extract_text()
 
             if page_text:
+
                 text += page_text + "\n"
 
+
         if not text.strip():
+
             return jsonify({
                 "error": "Could not extract text from this PDF."
             }), 400
 
+
         filename = file.filename
+
 
         save_document(
             session["user_id"],
@@ -529,17 +734,23 @@ def upload_pdf():
             text
         )
 
+
         file_path = os.path.join(
             UPLOAD_FOLDER,
             filename
         )
 
-        file.save(file_path)
+
+        file.save(
+            file_path
+        )
+
 
         return jsonify({
             "success": True,
             "filename": filename
         })
+
 
     except Exception as e:
 
@@ -548,14 +759,15 @@ def upload_pdf():
         }), 500
 
 
-# --------------------------------------------------
+# =========================================================
 # EXPORT CHAT
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/api/export")
 def export_chat():
 
     if not login_required():
+
         return jsonify({
             "error": "Login required"
         }), 401
@@ -569,43 +781,80 @@ def export_chat():
 
     for row in rows:
 
-        role = "You" if row["role"] == "user" else "AI"
+        role = (
+            "You"
+            if row["role"] == "user"
+            else "AI"
+        )
 
-        text += f"{role}: {row['content']}\n\n"
+        text += (
+            f"{role}: "
+            f"{row['content']}\n\n"
+        )
+
 
     return send_file(
-        io.BytesIO(text.encode("utf-8")),
+        io.BytesIO(
+            text.encode("utf-8")
+        ),
+
         mimetype="text/plain",
+
         as_attachment=True,
+
         download_name="chat_history.txt"
     )
 
 
-# --------------------------------------------------
+# =========================================================
 # RUN
-# --------------------------------------------------
+# =========================================================
 
 if __name__ == "__main__":
 
     print()
     print("=" * 55)
+
     print("🤖 AI CHATBOT SERVER")
-    print("=" * 55)
-    print(f"Model: {MODEL}")
-    print(f"Ollama: {OLLAMA_URL}")
-    print("Database: chat_memory.db")
-    print("Login: Enabled")
-    print("Memory: Enabled")
-    print("PDF Q&A: Enabled")
-    print("Voice: Browser based")
-    print("Text-to-Speech: Browser based")
-    print("Export: Enabled")
-    print()
-    print("🌐 http://127.0.0.1:5000")
+
     print("=" * 55)
 
+    print(f"Model: {MODEL}")
+
+    print(
+        "Groq: https://api.groq.com/openai/v1/chat/completions"
+    )
+
+    print("Database: chat_memory.db")
+
+    print("Login: Enabled")
+
+    print("Memory: Enabled")
+
+    print("PDF Q&A: Enabled")
+
+    print("Voice: Browser based")
+
+    print("Text-to-Speech: Browser based")
+
+    print("Export: Enabled")
+
+    print()
+
+    print(
+        "🌐 http://127.0.0.1:5000"
+    )
+
+    print("=" * 55)
+
+
     app.run(
-        host="127.0.0.1",
-        port=5000,
+        host="0.0.0.0",
+        port=int(
+            os.environ.get(
+                "PORT",
+                5000
+            )
+        ),
         debug=True
     )
