@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Login - AI Chatbot</title>
+    <title>Login | AI Chatbot</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
@@ -13,59 +14,127 @@
 
 <body class="auth-page">
 
-<div class="auth-card">
-
-    <div class="auth-logo">
-        🤖
+    <div class="auth-background">
+        <div class="glow glow-one"></div>
+        <div class="glow glow-two"></div>
+        <div class="grid-pattern"></div>
     </div>
 
-    <h1>AI Chatbot</h1>
+    <main class="auth-container">
 
-    <p class="auth-subtitle">
-        Login to continue
-    </p>
+        <section class="auth-card">
 
-    {% if error %}
-        <div class="error-message">
-            {{ error }}
-        </div>
-    {% endif %}
+            <div class="brand">
+                <div class="auth-logo">
+                    <span>✦</span>
+                </div>
 
-    <form method="POST">
+                <h1>AI Chatbot</h1>
 
-        <label>Username</label>
+                <p>
+                    Your intelligent assistant, always ready to help.
+                </p>
+            </div>
 
-        <input
-            type="text"
-            name="username"
-            placeholder="Enter username"
-            required
-        >
+            <div class="welcome">
+                <h2>Welcome back</h2>
 
-        <label>Password</label>
+                <p>
+                    Sign in to continue your conversation.
+                </p>
+            </div>
 
-        <input
-            type="password"
-            name="password"
-            placeholder="Enter password"
-            required
-        >
+            {% if error %}
+                <div class="error-message">
+                    <span>⚠</span>
+                    {{ error }}
+                </div>
+            {% endif %}
 
-        <button type="submit"
-                class="primary-button">
-            🔐 Login
-        </button>
+            <form method="POST" class="auth-form">
 
-    </form>
+                <div class="input-group">
 
-    <p class="auth-link">
-        Don't have an account?
-        <a href="{{ url_for('register') }}">
-            Create account
-        </a>
-    </p>
+                    <label for="username">
+                        Username
+                    </label>
 
-</div>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+
+                        <input
+                            id="username"
+                            type="text"
+                            name="username"
+                            placeholder="Enter your username"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="primary-button">
+
+                    <span>Login</span>
+                    <span class="button-arrow">→</span>
+
+                </button>
+
+            </form>
+
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+
+            <p class="auth-link">
+
+                Don't have an account?
+
+                <a href="{{ url_for('register') }}">
+                    Create account
+                </a>
+
+            </p>
+
+
+            <div class="auth-footer">
+                <span>🔐</span>
+                Secure AI Chat Experience
+            </div>
+
+        </section>
+
+    </main>
 
 </body>
+
 </html>
+
